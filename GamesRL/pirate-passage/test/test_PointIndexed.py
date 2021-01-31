@@ -1,6 +1,6 @@
 import unittest
 
-from game import PointIndexed
+from utils import PointIndexed
 
 class Test_PointIndexed(unittest.TestCase):
     two_dim = PointIndexed([
@@ -37,6 +37,15 @@ class Test_PointIndexed(unittest.TestCase):
         self.assertEqual(
             self.three_dim[(1, 1, 0)], 7
         )
+    
+    def test_shape(self):
+        self.assertEqual(
+            self.two_dim.shape, (2, 3)
+        )
+        self.assertEqual(
+            self.three_dim.shape, (2, 2, 2)
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,46 +1,5 @@
 from game_spec_validator import GameSpecValidator
-
-# from dataclasses import dataclass
-# 
-# @dataclass
-class Field:
-    """Placeholder object for a single field in the grid.
-    It can empty, inaccessible, etc.
-
-    Object should fully describe what's at `self.point`,
-    but implement no mechanism for change."""
-    def __init__(self, point):
-        self.point = point
-        self.pirates = []
-        self.contains_player = False
-        self.player_can_access = True
-    
-    def __repr__(self):
-        return f"<Field: {self.point}>"
-
-class PointIndexed:
-    """Wrapper for multi-dimensional list-like, L.
-    Replaces indexing by L[x][y] with L[x, y] instead."""
-    def __init__(self, wrapped):
-        self._wrapped = wrapped
-
-    def __repr__(self):
-        type_ = type(self)
-        module = type_.__module__
-        qualname = type_.__qualname__
-
-        return "<{}.{} object at {}\n{}".format(
-            module,
-            qualname,
-            hex(id(self)),
-            repr(self._wrapped)
-        )
-
-    def __getitem__(self, indices):
-        current = self._wrapped
-        for index in indices:
-            current = current[index]
-        return current
+from utils import Field, PointIndexed, AdjacencyList
 
 class Pirate:
     """Enemy. Occupies a single Field, travels along a route.
@@ -70,6 +29,7 @@ class Grid:
     
     Not yet tested.
     """
+    # TODO: Test Grid class
     def __init__(self, fields):
         self.fields = fields
         self.pirate_moves = {}

@@ -1,33 +1,28 @@
+from utils import AdjacencyList
+
 
 class ValidationSummary:
     """Not yet used. Summarizes all diagnostic strings from GameSpecValidator
-    into a single object. 
-    
+    into a single object.
+
     Access overall severity with `self.severity_code`.
     Add warnings and errors with `self.add_failure_condition`.
 
     Warning: No unit tests yet for this class.
     """
+
     def __init__(self):
         self.failure_conditions = []
-        self._severity_to_code_map = {
-            "OK": 0,
-            "warning": 1,
-            "error": 2
-        }
+        self._severity_to_code_map = {"OK": 0, "warning": 1, "error": 2}
         self.severity_code = self._severity_to_code_map["OK"]
-    
+
     def __repr__(self):
         severity_code_to_string_map = {
-            code:string for string, code in self._severity_to_code_map.items()
+            code: string for string, code in self._severity_to_code_map.items()
         }
-        severity_string = \
-            severity_code_to_string_map[self.severity_code].upper()
+        severity_string = severity_code_to_string_map[self.severity_code].upper()
 
-        return "{}\n{}".format(
-            severity_string,
-            ",\n".join(self.failure_conditions)
-        )
+        return "{}\n{}".format(severity_string, ",\n".join(self.failure_conditions))
 
     def add_failure_condition(self, condition):
         """Add failure condition to the list of conditions.
@@ -44,37 +39,32 @@ class ValidationSummary:
 
         return self.severity_code
 
-class GameSpecValidator:
 
+class GameSpecValidator:
     def validate_spec(self, spec):
         """Assert that spec creates a valid game instance."""
-        shape = spec["shape"]
-        start = spec["start"]
-        goal = spec["goal"]
+        shape = tuple(spec["shape"])
+        start = tuple(spec["start"])
+        goal = tuple(spec["goal"])
         inaccessible = spec["inaccessible"]
         pirate_routes = spec["pirate_routes"]
-        
 
         valid_shape = self._validate_shape(shape)
-        valid_inaccessible = self._validate_inaccessible(shape=shape,
-                                                        inaccessible=inaccessible)
+        valid_inaccessible = self._validate_inaccessible(
+            shape=shape, inaccessible=inaccessible
+        )
 
-        valid_start = self._validate_start(start_point=start,
-                                                shape=shape,
-                                                inaccessible=inaccessible)
-        valid_goal = self._validate_goal(goal_point=goal,
-                                                shape=shape,
-                                                inaccessible=inaccessible)
-        valid_pirates = self._validate_pirates(shape=shape,
-                                            pirates_dict=pirate_routes)
+        valid_start = self._validate_start(
+            start_point=start, shape=shape, inaccessible=inaccessible
+        )
+        valid_goal = self._validate_goal(
+            start_point=start, goal_point=goal, shape=shape, inaccessible=inaccessible
+        )
+        valid_pirates = self._validate_pirates(shape=shape, pirates_dict=pirate_routes)
 
-        all_valid = all([
-            valid_shape,
-            valid_start,
-            valid_goal,
-            valid_inaccessible,
-            valid_pirates
-        ])
+        all_valid = all(
+            [valid_shape, valid_start, valid_goal, valid_inaccessible, valid_pirates]
+        )
         return all_valid
 
     def _validate_shape(self, shape):
@@ -87,30 +77,35 @@ class GameSpecValidator:
     def _validate_start(self, start_point, shape, inaccessible):
         """Asserts input start_point is valid"""
         is_int = self._point_in_integer_space(point=start_point)
-        in_grid = self._point_in_grid(point=start_point,
-                                        grid_shape=shape)
-        is_accessible = self._point_accessible(point=start_point,
-                                            inaccessible=inaccessible)
-        
+        in_grid = self._point_in_grid(point=start_point, grid_shape=shape)
+        is_accessible = self._point_accessible(
+            point=start_point, inaccessible=inaccessible
+        )
+
         return is_int and in_grid and is_accessible
 
-    def _validate_goal(self, goal_point, shape, inaccessible):
-        """Asserts input goal_point is valid.
-        Return 0 if valid, else 1."""
+    def _validate_goal(self, start_point, goal_point, shape, inaccessible):
+        """Asserts input goal_point is valid and reachable."""
         is_int = self._point_in_integer_space(point=goal_point)
-        in_grid = self._point_in_grid(point=goal_point,
-                                        grid_shape=shape)
-        is_accessible = self._point_accessible(point=goal_point,
-                                            inaccessible=inaccessible)
+        in_grid = self._point_in_grid(point=goal_point, grid_shape=shape)
+        is_accessible = self._point_accessible(
+            point=goal_point, inaccessible=inaccessible
+        )
 
-        # not yet implemented:
-        # accessible_from_start = self._goal_accessible_from_start()
-        
-        return is_int and in_grid and is_accessible# and accessible_from_start
+        accessible_from_start = self._goal_reachable_from_start(
+            start_point=start_point,
+            goal_point=goal_point,
+            grid_shape=shape,
+            inaccessible=inaccessible,
+        )
+
+        return is_int and in_grid and is_accessible and accessible_from_start
 
     def _validate_inaccessible(self, shape, inaccessible):
         """Assert all inaccessible points are valid."""
-        in_grid = [self._point_in_grid(point, grid_shape=shape) for point in inaccessible]
+        in_grid = [
+            self._point_in_grid(point, grid_shape=shape) for point in inaccessible
+        ]
         return all(in_grid)
 
     def _validate_pirates(self, shape, pirates_dict):
@@ -120,14 +115,12 @@ class GameSpecValidator:
         is_circular = dict()
 
         for id, route in pirates_dict.items():
-            is_integer[id] = all([
-                self._point_in_integer_space(point)
-                for point in route
-            ])
-            in_grid[id] = all([
-                self._point_in_grid(point, grid_shape=shape)
-                for point in route
-            ])
+            is_integer[id] = all(
+                [self._point_in_integer_space(point) for point in route]
+            )
+            in_grid[id] = all(
+                [self._point_in_grid(point, grid_shape=shape) for point in route]
+            )
             is_circular[id] = self._route_is_circular(route)
 
         is_valid = {
@@ -135,7 +128,7 @@ class GameSpecValidator:
             for id in pirates_dict.keys()
         }
         return all(is_valid.values())
-        
+
     def _point_in_integer_space(self, point):
         """Assert that all components in `point` are integer-valued.
         Warning: Does not raise errors for nonsense inputs; simply returns False.
@@ -150,20 +143,24 @@ class GameSpecValidator:
         return row_coord_valid and col_coord_valid
 
     def _point_accessible(self, point, inaccessible):
-        return (point not in inaccessible)
+        return point not in inaccessible
 
-    def _goal_reachable_from_start(self):
+    def _goal_reachable_from_start(
+        self, start_point, goal_point, grid_shape, inaccessible
+    ):
         """Depth-first search to validate inaccessible fields"""
-        print("Not yet implemented")
+        graph = AdjacencyList(grid_shape=grid_shape, inaccessible=inaccessible)
+
+        return graph.depth_first_search(start=start_point, end=goal_point)
 
     def _route_is_circular(self, route):
         """Check that points in `route` form a continuous loop.
-        
+
         Each point must differ from the next
         by exactly -1/1 in row or column direction.
         """
         adjacent_to_previous = [
-            self._points_adjacent(a=point, b=route[i-1])
+            self._points_adjacent(a=point, b=route[i - 1])
             for i, point in enumerate(route)
         ]
         return all(adjacent_to_previous)
