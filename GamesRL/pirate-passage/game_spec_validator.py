@@ -7,14 +7,15 @@ class ValidationSummary:
 
     Access overall severity with `self.severity_code`.
     Add warnings and errors with `self.add_failure_condition`.
-
-    Warning: No unit tests yet for this class.
     """
 
-    def __init__(self):
-        self.failure_conditions = []
+    def __init__(self, failure_conditions=[]):
+        self.failure_conditions = failure_conditions
         self._severity_to_code_map = {"OK": 0, "warning": 1, "error": 2}
+
         self.severity_code = self._severity_to_code_map["OK"]
+        for unique_severity in set([cond[0] for cond in failure_conditions]):
+            self._update_severity(unique_severity)
 
     def __repr__(self):
         severity_code_to_string_map = {
@@ -39,58 +40,120 @@ class ValidationSummary:
 
         return self.severity_code
 
-
 class GameSpecValidator:
     def validate_spec(self, spec):
-        """Assert that spec creates a valid game instance."""
+        """Assert that `spec` creates a valid game instance.
+        
+        Return a list of conditions of format:
+            ("error_severity_string", "descriptor_string")
+        for every condition that invalidates provided specification `spec`
+        """
         shape = tuple(spec["shape"])
         start = tuple(spec["start"])
         goal = tuple(spec["goal"])
         inaccessible = spec["inaccessible"]
         pirate_routes = spec["pirate_routes"]
 
-        valid_shape = self._validate_shape(shape)
-        valid_inaccessible = self._validate_inaccessible(
+        shape_conditions = self._validate_shape(shape)
+        inaccessible_conditions = self._validate_inaccessible(
             shape=shape, inaccessible=inaccessible
         )
 
-        valid_start = self._validate_start(
+        start_field_conditions = self._validate_start(
             start_point=start, shape=shape, inaccessible=inaccessible
         )
-        valid_goal = self._validate_goal(
+        goal_field_conditions = self._validate_goal(
             start_point=start, goal_point=goal, shape=shape, inaccessible=inaccessible
         )
-        valid_pirates = self._validate_pirates(shape=shape, pirates_dict=pirate_routes)
+        pirate_conditions = self._validate_pirates(
+            shape=shape, pirates_dict=pirate_routes)
 
-        all_valid = all(
-            [valid_shape, valid_start, valid_goal, valid_inaccessible, valid_pirates]
+        # Flatten
+        all_conditions = sum(
+            [shape_conditions, inaccessible_conditions, start_field_conditions,
+                goal_field_conditions, pirate_conditions],
+            []
         )
-        return all_valid
+
+        return all_conditions
 
     def _validate_shape(self, shape):
-        """Asserts input shape is valid."""
-        components_are_positive = (shape[0] >= 0) and (shape[1] >= 0)
-        is_integer = self._point_in_integer_space(point=shape)
+        """Asserts input shape is valid.
 
-        return components_are_positive and is_integer
+        For each prerequisite failed, adds a condition to output list:
+            (error_severity_string, descriptor_string)
+        """
+        failure_conditions = []
+
+        components_are_nonnegative = (shape[0] >= 0) and (shape[1] >= 0)
+        if not components_are_nonnegative:
+            failure_conditions.append(
+                ("error", "Shape must be non-negative")
+            )
+
+        is_integer = self._point_in_integer_space(point=shape)
+        if not is_integer:
+            failure_conditions.append
+            (("error", "Shape must be integer")
+             )
+
+        return failure_conditions
 
     def _validate_start(self, start_point, shape, inaccessible):
-        """Asserts input start_point is valid"""
+        """Asserts input start_point is valid.
+
+        For each prerequisite failed, adds a condition to output list:
+            (error_severity_string, descriptor_string)
+        """
+        failure_conditions = []
+
         is_int = self._point_in_integer_space(point=start_point)
+        if not is_int:
+            failure_conditions.append(
+                ("error", "Start coordinates must be integer")
+            )
+
         in_grid = self._point_in_grid(point=start_point, grid_shape=shape)
+        if not in_grid:
+            failure_conditions.append(
+                ("error", "Start point must be located within input grid")
+            )
+
         is_accessible = self._point_accessible(
             point=start_point, inaccessible=inaccessible
         )
+        if not is_accessible:
+            failure_conditions.append(
+                ("error", "Start point must not be in list of inaccessible fields")
+            )
 
-        return is_int and in_grid and is_accessible
+        return failure_conditions
 
     def _validate_goal(self, start_point, goal_point, shape, inaccessible):
-        """Asserts input goal_point is valid and reachable."""
+        """Asserts input goal_point is valid and reachable.
+
+        For each prerequisite failed, adds a condition to output list:
+            (error_severity_string, descriptor_string)
+        """
+        failure_conditions = []
+
         is_int = self._point_in_integer_space(point=goal_point)
+        if not is_int:
+            failure_conditions.append(
+                ("error", "Goal coordinates must be integer")
+            )
         in_grid = self._point_in_grid(point=goal_point, grid_shape=shape)
+        if not in_grid:
+            failure_conditions.append(
+                ("error", "Goal point must be located within input grid")
+            )
         is_accessible = self._point_accessible(
             point=goal_point, inaccessible=inaccessible
         )
+        if not is_accessible:
+            failure_conditions.append(
+                ("error", "Goal point must not be in list of inaccessible fields")
+            )
 
         accessible_from_start = self._goal_reachable_from_start(
             start_point=start_point,
@@ -98,36 +161,67 @@ class GameSpecValidator:
             grid_shape=shape,
             inaccessible=inaccessible,
         )
+        if not accessible_from_start:
+            failure_conditions.append(
+                ("error", "No path between start and goal")
+            )
 
-        return is_int and in_grid and is_accessible and accessible_from_start
+        return failure_conditions
 
     def _validate_inaccessible(self, shape, inaccessible):
-        """Assert all inaccessible points are valid."""
+        """Assert all inaccessible points are valid.
+        Return list of failed prerequisites."""
         in_grid = [
             self._point_in_grid(point, grid_shape=shape) for point in inaccessible
         ]
-        return all(in_grid)
+        if sum(in_grid) == len(inaccessible) - 1:
+            point_outside_grid = inaccessible[in_grid.index(False)]
+            return [("error",
+                     f"Point {point_outside_grid} marked inaccessible, but is outside grid"
+                     )]
+        elif sum(in_grid) < len(inaccessible) - 1:
+            return [("error",
+                     "Multiple points marked inaccessible, but are outside grid"
+                     )]
+        else:
+            return []
 
     def _validate_pirates(self, shape, pirates_dict):
-        """Assert that all pirate routes are valid."""
-        is_integer = dict()
-        in_grid = dict()
-        is_circular = dict()
+        """Assert that all pirate routes are valid.
+
+        For each prerequisite failed, adds a condition to output list:
+            (error_severity_string, descriptor_string)
+        """
+        failure_conditions = []
+        is_integer = {}
+        in_grid = {}
+        is_circular = {}
 
         for id, route in pirates_dict.items():
             is_integer[id] = all(
                 [self._point_in_integer_space(point) for point in route]
             )
-            in_grid[id] = all(
-                [self._point_in_grid(point, grid_shape=shape) for point in route]
-            )
-            is_circular[id] = self._route_is_circular(route)
+            if not is_integer[id]:
+                failure_conditions.append(
+                    ("error", f"Pirate: {id} has points not in integer space")
+                )
 
-        is_valid = {
-            id: is_integer[id] and in_grid[id] and is_circular[id]
-            for id in pirates_dict.keys()
-        }
-        return all(is_valid.values())
+            in_grid[id] = all(
+                [self._point_in_grid(point, grid_shape=shape)
+                 for point in route]
+            )
+            if not in_grid[id]:
+                failure_conditions.append(
+                    ("error", f"Pirate: {id} has points outside grid")
+                )
+
+            is_circular[id] = self._route_is_circular(route)
+            if not is_circular[id]:
+                failure_conditions.append(
+                    ("error", f"Pirate: {id} route is not circular")
+                )
+
+        return failure_conditions
 
     def _point_in_integer_space(self, point):
         """Assert that all components in `point` are integer-valued.

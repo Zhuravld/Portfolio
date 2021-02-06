@@ -77,13 +77,13 @@ class Test_GameSpecValidator(unittest.TestCase):
             [[1,1], [2,2], [2,1]]
         ))
 
-    def test_validate_empty_pirates_returns_True(self):
-        self.assertTrue(GameSpecValidator()._validate_pirates(
+    def test_validate_empty_pirates_returns_empty(self):
+        self.assertEquals([], GameSpecValidator()._validate_pirates(
             shape=(2, 2), pirates_dict={})
         )
 
     def test_validate_spec(self):
-        self.assertTrue(GameSpecValidator().validate_spec(json_spec))
+        self.assertEquals([], GameSpecValidator().validate_spec(json_spec))
 
 
 if __name__ == "__main__":

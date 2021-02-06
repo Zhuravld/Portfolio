@@ -70,9 +70,7 @@ class AdjacencyList:
     Neighbours are represented by a mapping of node coordinates
     to a `list` of neighbouring node coordinates.
 
-    No option yet to instantiate from an N-dimensional array alone.
-    To do so, a helper function must be implemented
-    to specify a rule for edges based on shape alone.
+    Option to instantiate directly from 2-dimensional shape alone.
     """
 
     def __init__(self, grid_shape=None, inaccessible=[]):
