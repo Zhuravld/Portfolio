@@ -9,7 +9,7 @@ class Pirate:
     """
     _count = 0
     def __init__(self, route_waypoints, id=None):
-        self.route = route_waypoints
+        self.route = [tuple(wp) for wp in route_waypoints]
         self.i = 0
 
         Pirate._count += 1
@@ -17,11 +17,6 @@ class Pirate:
             id = Pirate._count
 
         self.id = id
-
-    def request_move(self, on_grid):
-        """Tell grid to register a move step"""
-        to = self._next()
-        on_grid.add_pirate_move(self.at, to)
 
     def execute_move(self):
         self.i = (self.i + 1) % len(self.route)
@@ -51,6 +46,10 @@ class Grid:
         self._mark_inaccessible_fields(inaccessible)
         self._set_start_and_goal_fields(start, goal)
         self.pirates = self._initialize_pirates(pirate_routes)
+    
+    @property
+    def shape(self):
+        return self.fields.shape
 
     def _initialize_fields(self, shape):
         """Generate grid of Fields from `shape` (2-tuple)"""
@@ -74,9 +73,9 @@ class Grid:
     def _initialize_pirates(self, pirate_routes):
         pirates = [
             Pirate(route, id=i)
-            for i, route in pirate_routes
+            for i, route in pirate_routes.items()
         ]
-        return {p.id:p for p in pirates}
+        return pirates
 
     def step(self, player_action):
         """Increment grid state given `player_action`.
@@ -93,7 +92,7 @@ class Grid:
             return endpoint_collisions
 
     def get_pirate_moves(self):
-        return {p.id: p._next() for p in self.pirates}
+        return {p.id: (p.at, p._next()) for p in self.pirates}
 
     def _execute_movements(self, in_transit_collisions):
         # self._message("Sending all movements commands")
