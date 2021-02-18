@@ -1,6 +1,5 @@
-# from dataclasses import dataclass
-#
-# @dataclass
+Point = tuple([int, int])
+
 class Field:
     """Placeholder object for a single field in the grid.
     It can empty, inaccessible, etc.
@@ -8,7 +7,7 @@ class Field:
     Object should fully describe what's at `self.point`,
     but implement no mechanism for change."""
 
-    def __init__(self, point):
+    def __init__(self, point: Point):
         self.point = point
         self.pirates = []
         self.contains_player = False
@@ -42,11 +41,11 @@ class PointIndexed:
         return current
 
     @property
-    def shape(self):
+    def shape(self) -> tuple:
         return self._shape
 
     @shape.setter
-    def shape(self, value):
+    def shape(self, value: tuple):
         self._shape = value
 
     def _init_shape(self, wrapped):
@@ -139,7 +138,7 @@ class AdjacencyList:
                         if node_down not in inaccessible:
                             self.insert_edge(e=(node, node_down))
 
-def points_adjacent(a, b):
+def points_adjacent(a: Point, b: Point) -> bool:
     """Assert that point `a` differs from point `b`
     by -1/1 in row or column direction."""
     row_delta_is_one = (a[0] - b[0]) in (-1, 1)

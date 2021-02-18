@@ -1,6 +1,5 @@
 from utils import AdjacencyList, points_adjacent
 
-
 class ValidationSummary:
     """Not yet used. Summarizes all diagnostic strings from GameSpecValidator
     into a single object.

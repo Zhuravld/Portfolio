@@ -2,6 +2,7 @@ from game_spec_validator import GameSpecValidator
 from grid import Grid
 from utils import points_adjacent
 
+Point = tuple([int, int])
 class Game:
     """Game environment.
     
@@ -9,18 +10,18 @@ class Game:
     Should implement methods `step`, `reset` etc,
     as expected for dynamic programming and reinforcement learning.
     """
-    def __init__(self, grid_spec):
+    def __init__(self, grid_spec: dict):
         GameSpecValidator().validate_spec(grid_spec)
         self.grid = Grid(grid_spec)
 
-    def step(self, player_action):
+    def step(self, player_action: tuple([Point, Point])) -> bool:
         collisions = self.grid.step(player_action)
 
         return True if collisions else False
 
-    def validate_action(self, player_action):
-        """Validate player action, returning an error string if any."""
-        msg = None
+    def validate_action(self, player_action: tuple([Point, Point])) -> str:
+        """Validate player action, returning an error string."""
+        msg = ""
 
         if not points_adjacent(*player_action):
             msg = "Can only move to an adjacent field"
@@ -32,13 +33,13 @@ class Game:
 
 class Player:
     """Controlled by user"""
-    def __init__(self, game):
+    def __init__(self, game: Game):
         self.game = game
         self.start_field = self.game.grid.start_field
         self.at = self.game.grid.start_field.point
         self.done = False
 
-    def move(self, to):
+    def move(self, to: Point) -> bool:
         """Tell grid to register a player move"""
         action = (self.at, to)
         msg = self.game.validate_action(action)
@@ -50,7 +51,7 @@ class Player:
         
         return self.done
 
-    def execute_move(self, to):
+    def execute_move(self, to: Point):
         self.at = to
 
 if __name__ == '__main__':

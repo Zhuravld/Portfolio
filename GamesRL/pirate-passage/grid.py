@@ -1,5 +1,6 @@
 from utils import PointIndexed, Field
 
+Point = tuple([int, int])
 class Pirate:
     """Enemy. Occupies a single Field, travels along a route.
     
@@ -8,7 +9,7 @@ class Pirate:
     route: list of waypoints
     """
     _count = 0
-    def __init__(self, route_waypoints, id=None):
+    def __init__(self, route_waypoints: list, id=None):
         self.route = [tuple(wp) for wp in route_waypoints]
         self.i = 0
 
@@ -36,7 +37,7 @@ class Grid:
     by passing the `Grid` obj as parameter.
     """
     # TODO: Test Grid class
-    def __init__(self, spec):
+    def __init__(self, spec: dict):
         shape, start, goal, inaccessible, pirate_routes = map(
             lambda k: spec[k],
             ["shape", "start", "goal", "inaccessible", "pirate_routes"]
@@ -48,7 +49,7 @@ class Grid:
         self.pirates = self._initialize_pirates(pirate_routes)
     
     @property
-    def shape(self):
+    def shape(self) -> tuple([int, int]):
         return self.fields.shape
 
     def _initialize_fields(self, shape):
@@ -59,25 +60,25 @@ class Grid:
             for col_idx in range(ncols)
         ])
 
-    def _mark_inaccessible_fields(self, inaccessible):
+    def _mark_inaccessible_fields(self, inaccessible: list(Point)):
         """Modify `self.grid` inplace to mark inaccessible fields."""
         self.inaccessible = inaccessible
         for point in inaccessible:
             self.fields[point].player_can_access = False
 
-    def _set_start_and_goal_fields(self, start_point, goal_point):
+    def _set_start_and_goal_fields(self, start_point: Point, goal_point: Point):
         """Init references to start and goal fields."""
         self.start_field = self.fields[start_point]
         self.goal_field = self.fields[goal_point]
 
-    def _initialize_pirates(self, pirate_routes):
+    def _initialize_pirates(self, pirate_routes: dict) -> list([Pirate]):
         pirates = [
             Pirate(route, id=i)
             for i, route in pirate_routes.items()
         ]
         return pirates
 
-    def step(self, player_action):
+    def step(self, player_action: tuple([Point, Point])) -> list:
         """Increment grid state given `player_action`.
         Return IDs of all collided pirates"""
         in_transit_collisions = self.check_in_transit_collisions(player_action)
@@ -98,7 +99,7 @@ class Grid:
         else:
             return endpoint_collisions
 
-    def get_pirate_moves(self):
+    def get_pirate_moves(self) -> dict:
         return {p.id: (p.at, p._next()) for p in self.pirates}
 
     def _execute_movements(self):
@@ -110,7 +111,7 @@ class Grid:
         """Placeholder for sending data to the UI"""
         print(msg)
     
-    def check_in_transit_collisions(self, player_action):
+    def check_in_transit_collisions(self, player_action: tuple([Point, Point])) -> list:
         player_from, player_to = player_action
         pirates_collided = []
 
@@ -122,14 +123,11 @@ class Grid:
                 
         return pirates_collided
         
-    def check_endpoint_collisions(self, player_action):
+    def check_endpoint_collisions(self, player_action: tuple([Point, Point])) -> list:
         _, player_to = player_action
         pirates_collided = []
 
         for pirate_id, (pirate_from, pirate_to) in self.get_pirate_moves().items():
-            # print("pirate_from", pirate_from)
-            # print("pirate_to", pirate_to)
-            # print("player_to", player_to)
             if pirate_to == player_to:
                 pirates_collided.append(pirate_id)
 
