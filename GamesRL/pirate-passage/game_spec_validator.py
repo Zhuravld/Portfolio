@@ -1,4 +1,4 @@
-from utils import AdjacencyList
+from utils import AdjacencyList, points_adjacent
 
 
 class ValidationSummary:
@@ -261,12 +261,7 @@ class GameSpecValidator:
 
     @staticmethod
     def _points_adjacent(a, b):
-        """Assert that point `a` differs from point `b`
-        by -1/1 in row or column direction."""
-        row_delta_is_one = (a[0] - b[0]) in (-1, 1)
-        col_delta_is_one = (a[1] - b[1]) in (-1, 1)
-        xor = row_delta_is_one ^ col_delta_is_one
-        return xor
+        return points_adjacent(a, b)
 
     @staticmethod
     def _value_is_integer(n):

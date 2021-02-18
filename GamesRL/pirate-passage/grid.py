@@ -79,12 +79,19 @@ class Grid:
 
     def step(self, player_action):
         """Increment grid state given `player_action`.
-        Return IDs of all collided pirates"""    
+        Return IDs of all collided pirates"""
         in_transit_collisions = self.check_in_transit_collisions(player_action)
-        self._execute_movements(player_action, in_transit_collisions)
-
         endpoint_collisions = self.check_endpoint_collisions(player_action)
-        self._message(f"Collided with pirates: {', '.join(endpoint_collisions)}")
+
+        if in_transit_collisions:
+            self._message(
+                f"Collided with pirates in transit: {', '.join(in_transit_collisions)}"
+            )
+        elif endpoint_collisions:
+            self._message(
+                f"Collided with pirates at endpoint: {', '.join(endpoint_collisions)}"
+            )
+        self._execute_movements()
         
         if in_transit_collisions:
             return in_transit_collisions
@@ -94,13 +101,10 @@ class Grid:
     def get_pirate_moves(self):
         return {p.id: (p.at, p._next()) for p in self.pirates}
 
-    def _execute_movements(self, in_transit_collisions):
+    def _execute_movements(self):
         # self._message("Sending all movements commands")
         for p in self.pirates:
             p.execute_move()
-        self._message(
-            f"Collided with pirates: {', '.join(in_transit_collisions)}"
-        )
 
     def _message(self, msg):
         """Placeholder for sending data to the UI"""
@@ -122,8 +126,12 @@ class Grid:
         _, player_to = player_action
         pirates_collided = []
 
-        for pirate_id, (_, pirate_to) in self.get_pirate_moves().items():
+        for pirate_id, (pirate_from, pirate_to) in self.get_pirate_moves().items():
+            # print("pirate_from", pirate_from)
+            # print("pirate_to", pirate_to)
+            # print("player_to", player_to)
             if pirate_to == player_to:
                 pirates_collided.append(pirate_id)
+
 
         return pirates_collided
