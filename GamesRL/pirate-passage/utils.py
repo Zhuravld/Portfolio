@@ -145,3 +145,10 @@ def points_adjacent(a: Point, b: Point) -> bool:
     col_delta_is_one = (a[1] - b[1]) in (-1, 1)
     xor = row_delta_is_one ^ col_delta_is_one
     return xor
+
+def value_is_integer(n) -> bool:
+    try:
+        f = float(n)
+        return f.is_integer()
+    except:
+        return False

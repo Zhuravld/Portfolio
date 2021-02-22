@@ -1,4 +1,4 @@
-from utils import AdjacencyList, points_adjacent
+from utils import AdjacencyList, points_adjacent, value_is_integer
 
 class ValidationSummary:
     """Not yet used. Summarizes all diagnostic strings from GameSpecValidator
@@ -22,7 +22,10 @@ class ValidationSummary:
         }
         severity_string = severity_code_to_string_map[self.severity_code].upper()
 
-        return "{}\n{}".format(severity_string, ",\n".join(self.failure_conditions))
+
+        return "{}\n{}".format(severity_string, "\n".join(
+            [cond[1] for cond in self.failure_conditions]
+        ))
 
     def add_failure_condition(self, condition):
         """Add failure condition to the list of conditions.
@@ -264,8 +267,4 @@ class GameSpecValidator:
 
     @staticmethod
     def _value_is_integer(n):
-        try:
-            f = float(n)
-            return f.is_integer()
-        except:
-            return False
+        return value_is_integer(n)
