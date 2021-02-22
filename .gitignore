@@ -127,3 +127,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+GamesRL/pirate-passage/.vscode/settings.json
