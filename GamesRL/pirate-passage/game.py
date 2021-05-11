@@ -3,13 +3,16 @@ from grid import Grid
 from utils import points_adjacent, value_is_integer
 
 Point = tuple([int, int])
+
+
 class Game:
     """Game environment.
-    
+
     Should take as input a level design specification.
     Should implement methods `step`, `reset` etc,
     as expected for dynamic programming and reinforcement learning.
     """
+
     def __init__(self, grid_spec: dict):
         errors = GameSpecValidator().validate_spec(grid_spec)
         if errors:
@@ -31,13 +34,15 @@ class Game:
         if not points_adjacent(*player_action):
             msg = "Can only move to an adjacent field"
 
-        elif (to in self.grid.inaccessible):
+        elif to in self.grid.inaccessible:
             msg = "Destination inaccessible to player"
 
         return msg
 
+
 class Player:
     """Controlled by user"""
+
     def __init__(self, game: Game):
         self.game = game
         self.start_field = self.game.grid.start_field
@@ -53,18 +58,19 @@ class Player:
             self.execute_move(to)
         else:
             print(msg)
-        
+
         return self.done
 
     def execute_move(self, to: Point):
         self.at = to
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import json
 
     def input_to_tuple(inp):
         """Parse user input string into coords tuple."""
-        return tuple(map(int, inp.replace('()','').strip().split(',')))
+        return tuple(map(int, inp.replace("()", "").strip().split(",")))
 
     inp = ""
     while inp.lower() not in ("y", "yes", "n", "no"):
@@ -107,19 +113,19 @@ if __name__ == '__main__':
 
         for param, s in zip(
             [shape, start, goal, inaccessible, pirate_routes],
-            ["shape", "start", "goal", "inaccessible", "pirate_routes"]
+            ["shape", "start", "goal", "inaccessible", "pirate_routes"],
         ):
             spec[s] = param
 
     game = Game(spec)
     p = Player(game)
-    
+
     def enemies():
         return [p.at for p in game.grid.pirates]
-    
+
     def state():
         return p.at, enemies()
-    
+
     print("Initial state:")
     print(state())
 
