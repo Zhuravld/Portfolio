@@ -1,10 +1,16 @@
 import unittest
-import json
 
 from game_spec_validator import GameSpecValidator
 
-with open("test/test_spec.json") as f:
-    json_spec = json.load(f)
+test_spec = {
+    "shape": [4, 4],
+    "start": [0, 0],
+    "goal": [3, 3],
+    "inaccessible": [[2, 1], [1,2]],
+    "pirate_routes": {
+        "0": [[1,1], [1,2], [2,2], [2,1]]
+    }
+}
 
 
 class Test_GameSpecValidator(unittest.TestCase):
@@ -69,12 +75,12 @@ class Test_GameSpecValidator(unittest.TestCase):
         self.assertFalse(is_circular([[1, 1], [2, 2], [2, 1]]))
 
     def test_validate_empty_pirates_returns_empty(self):
-        self.assertEquals(
+        self.assertEqual(
             [], GameSpecValidator()._validate_pirates(shape=(2, 2), pirates_dict={})
         )
 
     def test_validate_spec(self):
-        self.assertEquals([], GameSpecValidator().validate_spec(json_spec))
+        self.assertEqual([], GameSpecValidator().validate_spec(test_spec))
 
 
 if __name__ == "__main__":
