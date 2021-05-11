@@ -1,5 +1,6 @@
 Point = tuple([int, int])
 
+
 class Field:
     """Placeholder object for a single field in the grid.
     It can empty, inaccessible, etc.
@@ -138,6 +139,7 @@ class AdjacencyList:
                         if node_down not in inaccessible:
                             self.insert_edge(e=(node, node_down))
 
+
 def points_adjacent(a: Point, b: Point) -> bool:
     """Assert that point `a` differs from point `b`
     by -1/1 in row or column direction."""
@@ -145,6 +147,7 @@ def points_adjacent(a: Point, b: Point) -> bool:
     col_delta_is_one = (a[1] - b[1]) in (-1, 1)
     xor = row_delta_is_one ^ col_delta_is_one
     return xor
+
 
 def value_is_integer(n) -> bool:
     try:

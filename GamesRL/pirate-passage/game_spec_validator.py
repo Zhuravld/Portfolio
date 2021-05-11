@@ -1,5 +1,6 @@
 from utils import AdjacencyList, points_adjacent, value_is_integer
 
+
 class ValidationSummary:
     """Not yet used. Summarizes all diagnostic strings from GameSpecValidator
     into a single object.
@@ -22,10 +23,9 @@ class ValidationSummary:
         }
         severity_string = severity_code_to_string_map[self.severity_code].upper()
 
-
-        return "{}\n{}".format(severity_string, "\n".join(
-            [cond[1] for cond in self.failure_conditions]
-        ))
+        return "{}\n{}".format(
+            severity_string, "\n".join([cond[1] for cond in self.failure_conditions])
+        )
 
     def add_failure_condition(self, condition):
         """Add failure condition to the list of conditions.
@@ -42,10 +42,11 @@ class ValidationSummary:
 
         return self.severity_code
 
+
 class GameSpecValidator:
     def validate_spec(self, spec):
         """Assert that `spec` creates a valid game instance.
-        
+
         Return a list of conditions of format:
             ("error_severity_string", "descriptor_string")
         for every condition that invalidates provided specification `spec`
@@ -68,13 +69,19 @@ class GameSpecValidator:
             start_point=start, goal_point=goal, shape=shape, inaccessible=inaccessible
         )
         pirate_conditions = self._validate_pirates(
-            shape=shape, pirates_dict=pirate_routes)
+            shape=shape, pirates_dict=pirate_routes
+        )
 
         # Flatten
         all_conditions = sum(
-            [shape_conditions, inaccessible_conditions, start_field_conditions,
-                goal_field_conditions, pirate_conditions],
-            []
+            [
+                shape_conditions,
+                inaccessible_conditions,
+                start_field_conditions,
+                goal_field_conditions,
+                pirate_conditions,
+            ],
+            [],
         )
 
         return all_conditions
@@ -89,15 +96,12 @@ class GameSpecValidator:
 
         components_are_nonnegative = (shape[0] >= 0) and (shape[1] >= 0)
         if not components_are_nonnegative:
-            failure_conditions.append(
-                ("error", "Shape must be non-negative")
-            )
+            failure_conditions.append(("error", "Shape must be non-negative"))
 
         is_integer = self._point_in_integer_space(point=shape)
         if not is_integer:
             failure_conditions.append
-            (("error", "Shape must be integer")
-             )
+            (("error", "Shape must be integer"))
 
         return failure_conditions
 
@@ -111,9 +115,7 @@ class GameSpecValidator:
 
         is_int = self._point_in_integer_space(point=start_point)
         if not is_int:
-            failure_conditions.append(
-                ("error", "Start coordinates must be integer")
-            )
+            failure_conditions.append(("error", "Start coordinates must be integer"))
 
         in_grid = self._point_in_grid(point=start_point, grid_shape=shape)
         if not in_grid:
@@ -141,9 +143,7 @@ class GameSpecValidator:
 
         is_int = self._point_in_integer_space(point=goal_point)
         if not is_int:
-            failure_conditions.append(
-                ("error", "Goal coordinates must be integer")
-            )
+            failure_conditions.append(("error", "Goal coordinates must be integer"))
         in_grid = self._point_in_grid(point=goal_point, grid_shape=shape)
         if not in_grid:
             failure_conditions.append(
@@ -164,9 +164,7 @@ class GameSpecValidator:
             inaccessible=inaccessible,
         )
         if not accessible_from_start:
-            failure_conditions.append(
-                ("error", "No path between start and goal")
-            )
+            failure_conditions.append(("error", "No path between start and goal"))
 
         return failure_conditions
 
@@ -178,13 +176,16 @@ class GameSpecValidator:
         ]
         if sum(in_grid) == len(inaccessible) - 1:
             point_outside_grid = inaccessible[in_grid.index(False)]
-            return [("error",
-                     f"Point {point_outside_grid} marked inaccessible, but is outside grid"
-                     )]
+            return [
+                (
+                    "error",
+                    f"Point {point_outside_grid} marked inaccessible, but is outside grid",
+                )
+            ]
         elif sum(in_grid) < len(inaccessible) - 1:
-            return [("error",
-                     "Multiple points marked inaccessible, but are outside grid"
-                     )]
+            return [
+                ("error", "Multiple points marked inaccessible, but are outside grid")
+            ]
         else:
             return []
 
@@ -209,8 +210,7 @@ class GameSpecValidator:
                 )
 
             in_grid[id] = all(
-                [self._point_in_grid(point, grid_shape=shape)
-                 for point in route]
+                [self._point_in_grid(point, grid_shape=shape) for point in route]
             )
             if not in_grid[id]:
                 failure_conditions.append(

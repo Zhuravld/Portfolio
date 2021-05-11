@@ -3,7 +3,6 @@ from utils import AdjacencyList, PointIndexed, Field
 
 
 class Test_AdjacencyList(unittest.TestCase):
-    
     def test_get_neighbours_returns_empty_list(self):
         self.AL_one_dim = AdjacencyList()
 
@@ -50,18 +49,19 @@ class Test_AdjacencyList(unittest.TestCase):
         self.assertTrue(self.AL.depth_first_search(end=v5, start=v1))
         self.assertFalse(self.AL.depth_first_search(end=v6, start=v1))
 
-
     def test_init_from_grid_shape(self):
-        self.AL = AdjacencyList(grid_shape=(2, 3), inaccessible=( (0,2), (1,0)))
+        self.AL = AdjacencyList(grid_shape=(2, 3), inaccessible=((0, 2), (1, 0)))
 
         self.assertEquals(
-            self.AL.neighbours, {
+            self.AL.neighbours,
+            {
                 (0, 0): [(0, 1)],
                 (0, 1): [(0, 0), (1, 1)],
                 (1, 1): [(0, 1), (1, 2)],
-                (1, 2): [(1, 1)]
-            }
+                (1, 2): [(1, 1)],
+            },
         )
+
 
 if __name__ == "__main__":
     unittest.main()
