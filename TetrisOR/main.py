@@ -1,19 +1,25 @@
-U = (0, 1)
-L = (-1, 0)
-R = (1, 0)
-D = (0, -1)
+from functools import reduce
+
+from utils import Field, PointIndexed, Point
+Vector = Point
+
+
+U = Vector(0, -1)
+L = Vector(-1, 0)
+R = Vector(1, 0)
+D = Vector(0, 1)
 DIRECTIONS = [U, R, D, L]
 
-class Node:
-    def __init__(self, id):
-        self.id = id
+# class Node:
+#     def __init__(self, id):
+#         self.id = id
 
-    def go(self, direction):
-        """Check whether a neighbour exists in this direction"""
-        pass
+#     def go(self, direction):
+#         """Check whether a neighbour exists in this direction"""
+#         pass
 
-    def get_position(self):
-        pass
+#     def get_position(self):
+#         pass
 
 
 class Piece:
@@ -21,6 +27,7 @@ class Piece:
         self.orientation = orientation
         self.directions = None
         self.assign_neighbours()
+        self.size = len(self.directions)
         self.set_orientation(orientation)
 
     def rotate(self, turn):
@@ -167,8 +174,6 @@ class Orange(Piece):
         }
 
 
-from utils import Field, PointIndexed, Point, AdjacencyList
-
 class Grid(PointIndexed):
     def __init__(self, Nx, Ny):
         fields = self._make_list(Nx, Ny)
@@ -180,10 +185,49 @@ class Grid(PointIndexed):
             [Field((i, j)) for j in range(Ny)]
             for i in range(Nx)
         ]
-    
-    def place(piece: Piece, at: Point):
-        pass
 
+    def place(self, piece: Piece, at: Point):
+        """Place a `piece` with the root node `at` a point.
+        
+        Traverse all nodes in a piece with DFS.
+        Check each node visited against the grid.
+        """
+        from_point = at
+        discovered = {}
+        path = {0: [from_point]}
+        nodes_to_place = {}
+
+        def visit(node: int) -> bool:
+            discovered[node] = True
+            for nb, direction in piece.directions[node].items():
+
+                if not discovered.get(nb, False):
+                    path[nb] = path[node] + [DIRECTIONS[direction]]
+                    path_to_nb = reduce(lambda a, b: a+b, path[nb])
+                    field = self[path_to_nb]
+                    if field.node[0] is not None:
+                        print(f"Piece found at {path_to_nb}: {field.node[0]}")
+                        return False
+                    else:
+                        nodes_to_place[nb] = path_to_nb
+                        return visit(nb)
+            
+            return True
+
+        field = self[from_point]
+        if field.node[0] is not None:
+            print(f"Piece found at {from_point}: {field.node[0]}")
+            return self
+        else:
+            nodes_to_place[0] = from_point
+            success = visit(0)
+
+        if success:
+            # Checked all fields - we can safely place the piece
+            for n, path_to_n in nodes_to_place.items():
+                self[path_to_n].node = (piece, n)
+
+        return self
     
     def __repr__(self):
         type_ = type(self)
@@ -198,22 +242,32 @@ class Grid(PointIndexed):
         piece_ids = []
         piece_markers = {}
 
-        R, C = self.shape
+        C, R = self.shape
         body = ""
-        for x in range(R):
-            for y in range(C):
+        for y in range(R):
+            for x in range(C):
                 field = self[x, y]
                 piece, node_id = field.node
                 if piece is not None:
                     if piece not in piece_ids:
                         piece_ids.append(piece)
-                        piece_markers[piece] = len(piece_ids) % len(markers)
+                        piece_markers[piece] = markers[len(piece_ids) % len(markers)]
 
                     body += f"[{piece_markers[piece]}]"
                 else:
                     body += "[ ]"
             
-            body += "\n" if x < R-1 else ""
+            body += "\n" if y < R-1 else ""
 
         return "\n".join([header, body])
 
+if __name__ == '__main__':
+    g = Grid(11, 5)
+    o = Orange()
+    g.place(piece=o, at=Point(3,1))
+
+    # c = Cyan()
+    # g.place(piece=c, at=Point(0,1))
+
+    print(g)
+    o.print_directions()

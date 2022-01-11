@@ -1,12 +1,40 @@
-Point = tuple([int, int])
+class Point:
+    def __init__(self, x=0, y=0):
+        self.x = x
+        self.y = y
+
+    def __str__(self):
+        return "({0},{1})".format(self.x, self.y)
+
+    def __add__(self, other):
+        x = self.x + other.x
+        y = self.y + other.y
+        return Point(x, y)
+
+    def __sub__(self, other):
+        x = self.x - other.x
+        y = self.y - other.y
+        return Point(x, y)
+    
+    def __iter__(self):
+        self.i = 0
+        return self
+    
+    def __next__(self):
+        if self.i < 2:
+            e = [self.x, self.y][self.i]
+            self.i += 1
+            return e
+        else:
+            raise StopIteration
 
 
 class Field:
     """Placeholder object for a single field in the grid.
-    It can empty, inaccessible, etc.
-
-    Object should fully describe what's at `self.point`,
-    but implement no mechanism for change."""
+    
+    Points to a node of a piece, represented as (obj, int)
+    where obj = piece instance and int = node id.
+    """
 
     def __init__(self, point: Point):
         self.point = point
