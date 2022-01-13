@@ -178,8 +178,8 @@ class AdjacencyList:
 def points_adjacent(a: Point, b: Point) -> bool:
     """Assert that point `a` differs from point `b`
     by -1/1 in row or column direction."""
-    row_delta_is_one = (a[0] - b[0]) in (-1, 1)
-    col_delta_is_one = (a[1] - b[1]) in (-1, 1)
+    row_delta_is_one = (a.x - b.x) in (-1, 1)
+    col_delta_is_one = (a.y - b.y) in (-1, 1)
     xor = row_delta_is_one ^ col_delta_is_one
     return xor
 
