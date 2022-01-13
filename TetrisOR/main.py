@@ -10,24 +10,12 @@ R = Vector(1, 0)
 D = Vector(0, 1)
 DIRECTIONS = [U, R, D, L]
 
-# class Node:
-#     def __init__(self, id):
-#         self.id = id
-
-#     def go(self, direction):
-#         """Check whether a neighbour exists in this direction"""
-#         pass
-
-#     def get_position(self):
-#         pass
-
-
 class Piece:
     def __init__(self, orientation=1):
-        self.orientation = orientation
         self.directions = None
         self.assign_neighbours()
         self.size = len(self.directions)
+        self.orientation = 1
         self.set_orientation(orientation)
 
     def rotate(self, turn):
@@ -114,7 +102,7 @@ class Piece:
 
 
     def print_directions(self):
-        """Replace integer directions with letters for a bit more readability."""
+        """Replace integer directions with letters for more readability."""
         to_print = {node: {} for node in self.directions}
         for node, neighbours in self.directions.items():
             for neighbour, direction in neighbours.items():
@@ -128,6 +116,7 @@ class Cyan(Piece):
         []
         [][]
     """
+    code = "C"
     valid_orientations = [1, 2, 3, 4]
 
     def __init__(self, orientation=1):
@@ -151,6 +140,7 @@ class Orange(Piece):
         [][]
           []
     """
+    code = "O"
     valid_orientations = [-4, -3, -2, -1, 1, 2, 3, 4]
 
     def __init__(self, orientation=1):
@@ -173,11 +163,13 @@ class Orange(Piece):
             4: {2: 0}
         }
 
+COLORS = [Orange, Cyan]
 
 class Grid(PointIndexed):
     def __init__(self, Nx, Ny):
         fields = self._make_list(Nx, Ny)
         super().__init__(fields)
+        self._pieces = []
 
     def _make_list(self, Nx, Ny):
         """Return 2D list of Fields of shape (Nx, Ny)."""
@@ -196,6 +188,7 @@ class Grid(PointIndexed):
         discovered = {}
         path = {0: [from_point]}
         nodes_to_place = {}
+        class PieceFoundException(Exception): pass
 
         def visit(node: int) -> bool:
             discovered[node] = True
@@ -207,12 +200,10 @@ class Grid(PointIndexed):
                     field = self[path_to_nb]
                     if field.node[0] is not None:
                         print(f"Piece found at {path_to_nb}: {field.node[0]}")
-                        return False
+                        raise PieceFoundException
                     else:
                         nodes_to_place[nb] = path_to_nb
-                        return visit(nb)
-            
-            return True
+                        visit(nb)
 
         field = self[from_point]
         if field.node[0] is not None:
@@ -220,14 +211,36 @@ class Grid(PointIndexed):
             return self
         else:
             nodes_to_place[0] = from_point
-            success = visit(0)
-
-        if success:
-            # Checked all fields - we can safely place the piece
-            for n, path_to_n in nodes_to_place.items():
-                self[path_to_n].node = (piece, n)
+            try:
+                visit(0)
+                # Checked all fields - we can safely place the piece
+                for n, path_to_n in nodes_to_place.items():
+                    self[path_to_n].node = (piece, n)
+                self._pieces.append(piece)
+            except PieceFoundException:
+                pass
 
         return self
+
+    def _is_complete(self):
+        """Return True iff every field is occupied by a piece."""
+        return self.size == sum(map(
+                lambda column:
+                sum(map(
+                    lambda field:
+                    isinstance(field.node[0], Piece),
+                    column
+                )),
+                self._wrapped
+            ))
+
+    @property
+    def pieces(self) -> list:
+        return self._pieces
+    
+    @property
+    def size(self) -> int:
+        return self.shape[0] * self.shape[1]
     
     def __repr__(self):
         type_ = type(self)
@@ -247,7 +260,7 @@ class Grid(PointIndexed):
         for y in range(R):
             for x in range(C):
                 field = self[x, y]
-                piece, node_id = field.node
+                piece, _ = field.node
                 if piece is not None:
                     if piece not in piece_ids:
                         piece_ids.append(piece)
@@ -261,13 +274,53 @@ class Grid(PointIndexed):
 
         return "\n".join([header, body])
 
+
+
+class Game:
+    def __init__(self, grid_shape: tuple([int, int])) -> None:
+        self.grid = Grid(*grid_shape)
+        self.n_pieces = {}
+        self.generate_pieces()
+    
+    def generate_pieces(self):
+        """Generate library of pieces.
+        Currently just hardcodes 2x Cyan pieces
+        """
+        self.n_pieces["C"] = 2
+    
+    def place(self, code: str, at: Point, orientation: int = 1):
+        """Place a piece of type `code` with the root node `at` a point."""
+        if self.n_pieces.get(code, 0) > 0:
+            try:
+                piece = self._get_piece(code)(orientation=orientation)
+                self.grid = self.grid.place(piece=piece, at=at)
+                self.n_pieces[code] -= 1
+            except Exception as e:
+                print(e)
+        else:
+            print("No more pieces remaining of type:", code)
+
+        print(self.grid)
+    
+    def _get_piece(self, code):
+        return next(filter(
+            lambda piece: piece.code == code,
+            COLORS
+        ))
+    
+
+
+
 if __name__ == '__main__':
-    g = Grid(11, 5)
-    o = Orange()
-    g.place(piece=o, at=Point(3,1))
 
-    # c = Cyan()
-    # g.place(piece=c, at=Point(0,1))
+    G = Game(grid_shape=(3, 2))
 
-    print(g)
-    o.print_directions()
+    G.place(code="C", at=Point(0, 0), orientation=1)
+
+    print(G.grid._is_complete())
+
+    G.place(code="C", at=Point(2, 1), orientation=3)
+
+    G.place(code="C", at=Point(2, 1), orientation=3)
+    
+    print(G.grid._is_complete())
