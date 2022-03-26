@@ -122,7 +122,8 @@ def solve_brute_force(G: Game, verbose=False):
             if verbose:
                 if no_space_left:
                     print("No space left")
-                print(f"Couldn't place piece {n}. Rolling back to previous state:")
+                print(f"Couldn't place piece {n}. Rolling back to previous state.")
+            current_node = previous_node
             pieces_placed = get_previous_state(current_node)
             old_state = prepopulate_grid(G.grid.shape, G.n_pieces, pieces_placed)
             rollback_to(game=G, grid_state=old_state)
