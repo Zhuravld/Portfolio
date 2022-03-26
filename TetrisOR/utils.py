@@ -1,4 +1,5 @@
 class Point:
+    """Point in 2D space. Supports vector arithmetic"""
     def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
@@ -130,13 +131,14 @@ class AdjacencyList:
             self.neighbours[v2] = []
         self.neighbours[v2].append(v1)
 
-    def depth_first_search(self, end, start):
+    def depth_first_search(self, start, end, discovered={}):
         """Returns True if end node is reachable from start node."""
-        discovered = {}
+        newly_discovered = []
 
         def visit(node):
             found = False
             discovered[node] = True
+            newly_discovered.append(node)
 
             for nb in self.get_neighbours(node):
                 if nb == end:
@@ -146,13 +148,43 @@ class AdjacencyList:
 
             return found
 
-        return visit(start)
+        found = visit(start)
+        if end:
+            return found
+        else:
+            return newly_discovered
+    
+    def find_connected_components(self):
+        """Return connected components.
+        Call DFS on each node, visit each node once.
+        """
+        component_ids = {}
+        component_count = 0
+        discovered = {}
+        
+        if self.nodes:
+            node_list = self.nodes
+        else:
+            node_list = self.neighbours.keys()
+
+        for node in node_list:
+            node_component_id = component_ids.get(node, None)
+            if node_component_id is None:
+                newly_discovered = self.depth_first_search(start=node, end=None, discovered=discovered)
+                for discovered_node in newly_discovered:
+                    component_ids[discovered_node] = component_count
+
+                component_count += 1
+        
+        return self._group_by_value(component_ids)
 
     def _init_from_grid_shape(self, grid_shape, inaccessible):
         """Init adjacency list from a rectangular 2D grid of nodes.
         Pass over nodes marked "inaccessible"."""
         if len(grid_shape) != 2:
             raise NotImplementedError("Only 2D grid supported")
+
+        self.nodes = []
 
         rows, cols = grid_shape
 
@@ -161,6 +193,7 @@ class AdjacencyList:
 
                 node = (r, c)
                 if node not in inaccessible:
+                    self.nodes.append(node)
 
                     # Insert row edge, if not in last column
                     if c != cols - 1:
@@ -174,10 +207,19 @@ class AdjacencyList:
                         if node_down not in inaccessible:
                             self.insert_edge(e=(node, node_down))
 
+    def _group_by_value(self, d: dict) -> dict:
+        grouped = {}
+        for key, value in d.items():
+            key_list = grouped.get(value, [])
+            if not key_list:
+                grouped[value] = key_list
+            key_list.append(key)
+
+        return grouped
 
 def points_adjacent(a: Point, b: Point) -> bool:
-    """Assert that point `a` differs from point `b`
-    by -1/1 in row or column direction."""
+    """Return whether point `a` differs from point `b`
+    by -1 or 1 in row or column direction."""
     row_delta_is_one = (a.x - b.x) in (-1, 1)
     col_delta_is_one = (a.y - b.y) in (-1, 1)
     xor = row_delta_is_one ^ col_delta_is_one
