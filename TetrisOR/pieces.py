@@ -1,4 +1,5 @@
 from utils import Point
+
 Vector = Point
 
 U = Vector(0, -1)
@@ -6,6 +7,7 @@ L = Vector(-1, 0)
 R = Vector(1, 0)
 D = Vector(0, 1)
 DIRECTIONS = (U, R, D, L)
+
 
 class Piece:
     code = None
@@ -23,7 +25,7 @@ class Piece:
     def rotate(self, turn):
         """Adjust nodes according to direction of turn.
         Anti-clockwise is -1, clockwise is 1."""
-        
+
         new_directions = {node: {} for node in self.directions}
         for node, neighbours in self.directions.items():
             for neighbour, direction in neighbours.items():
@@ -56,29 +58,32 @@ class Piece:
 
     def set_orientation(self, orientation):
         """Rotate and/or flip piece to the desired orientation.
-        
+
         Note that the orientations are coded so that flipping on the X-axis
         changes between orientations 1 and -1.
         """
 
         if orientation not in self.valid_orientations:
-            raise ValueError(f"Only valid orientations are: " + ", ".join(map(str, self.valid_orientations)))
-        
+            raise ValueError(
+                f"Only valid orientations are: "
+                + ", ".join(map(str, self.valid_orientations))
+            )
+
         current = self.orientation
-        
-        current_flipped = (current < 0)
-        target_flipped = (orientation < 0)
+
+        current_flipped = current < 0
+        target_flipped = orientation < 0
 
         if current_flipped:
 
             if current_flipped ^ target_flipped:
                 self.set_orientation(-1)
                 self.flip(0)  # [-1] flipped on X -> [1]
-                
+
                 # positive rotation
                 for _ in range((orientation - 1) % 4):
                     self.rotate(1)
-            
+
             else:
                 # negative rotation
                 for _ in range((current - orientation) % 4):
@@ -89,11 +94,11 @@ class Piece:
             if current_flipped ^ target_flipped:
                 self.set_orientation(1)
                 self.flip(0)  # [1] flipped on X -> [-1]
-                
+
                 # negative rotation
                 for _ in range((-1 - orientation) % 4):
                     self.rotate(1)
-            
+
             else:
                 # positive rotation
                 for _ in range((orientation - current) % 4):
@@ -102,7 +107,6 @@ class Piece:
         self.orientation = orientation
         return self
 
-
     def print_directions(self):
         """Replace integer directions with letters for more readability."""
         to_print = {node: {} for node in self.directions}
@@ -110,14 +114,16 @@ class Piece:
             for neighbour, direction in neighbours.items():
                 string_map = dict(enumerate(["U", "R", "D", "L"]))
                 to_print[node][neighbour] = string_map[direction]
-        
+
         print(to_print)
+
 
 class Cyan(Piece):
     """Base orientation:
-        []
-        [][]
+    []
+    [][]
     """
+
     code = "C"
     size = 3
     valid_orientations = [-4, -3, -2, -1, 1, 2, 3, 4]
@@ -125,25 +131,19 @@ class Cyan(Piece):
 
     def __init__(self, orientation=1):
         super().__init__(orientation=orientation)
-    
+
     def assign_neighbours(self):
         """Assign directions of neighbours according to base orientation"""
-        self.directions = {
-            0: {1: 2},
-            1: {
-                0: 0,
-                2: 1
-            },
-            2: {1: 3}
-        }
-    
+        self.directions = {0: {1: 2}, 1: {0: 0, 2: 1}, 2: {1: 3}}
+
 
 class Orange(Piece):
     """Base orientation:
-          [][]            
-        [][]
-          []
+      [][]
+    [][]
+      []
     """
+
     code = "O"
     size = 5
     valid_orientations = [-4, -3, -2, -1, 1, 2, 3, 4]
@@ -151,22 +151,16 @@ class Orange(Piece):
 
     def __init__(self, orientation=1):
         super().__init__(orientation=orientation)
-    
+
     def assign_neighbours(self):
         """Assign directions of neighbours according to base orientation"""
         self.directions = {
             0: {1: 3},
-            1: {
-                0: 1,
-                2: 2
-            },
-            2: {
-                1: 0,
-                3: 3,
-                4: 2
-            },
+            1: {0: 1, 2: 2},
+            2: {1: 0, 3: 3, 4: 2},
             3: {2: 1},
-            4: {2: 0}
+            4: {2: 0},
         }
+
 
 COLORS = [Orange, Cyan]

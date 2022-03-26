@@ -1,5 +1,6 @@
 class Point:
     """Point in 2D space. Supports vector arithmetic"""
+
     def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
@@ -16,11 +17,11 @@ class Point:
         x = self.x - other.x
         y = self.y - other.y
         return Point(x, y)
-    
+
     def __iter__(self):
         self.i = 0
         return self
-    
+
     def __next__(self):
         if self.i < 2:
             e = [self.x, self.y][self.i]
@@ -32,7 +33,7 @@ class Point:
 
 class Field:
     """Placeholder object for a single field in the grid.
-    
+
     Points to a node of a piece, represented as (obj, int)
     where obj = piece instance and int = node id.
     """
@@ -40,7 +41,7 @@ class Field:
     def __init__(self, point: Point):
         self.point = point
         self._node = (None, None)
-    
+
     @property
     def node(self) -> tuple:
         return self._node
@@ -51,7 +52,6 @@ class Field:
 
     def __repr__(self):
         return f"<{self.point}>"
-
 
 
 class PointIndexed:
@@ -153,7 +153,7 @@ class AdjacencyList:
             return found
         else:
             return newly_discovered
-    
+
     def find_connected_components(self):
         """Return connected components.
         Call DFS on each node, visit each node once.
@@ -161,7 +161,7 @@ class AdjacencyList:
         component_ids = {}
         component_count = 0
         discovered = {}
-        
+
         if self.nodes:
             node_list = self.nodes
         else:
@@ -170,12 +170,14 @@ class AdjacencyList:
         for node in node_list:
             node_component_id = component_ids.get(node, None)
             if node_component_id is None:
-                newly_discovered = self.depth_first_search(start=node, end=None, discovered=discovered)
+                newly_discovered = self.depth_first_search(
+                    start=node, end=None, discovered=discovered
+                )
                 for discovered_node in newly_discovered:
                     component_ids[discovered_node] = component_count
 
                 component_count += 1
-        
+
         return self._group_by_value(component_ids)
 
     def _init_from_grid_shape(self, grid_shape, inaccessible):
@@ -216,6 +218,7 @@ class AdjacencyList:
             key_list.append(key)
 
         return grouped
+
 
 def points_adjacent(a: Point, b: Point) -> bool:
     """Return whether point `a` differs from point `b`

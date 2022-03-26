@@ -5,6 +5,7 @@ from pieces import COLORS
 from utils import Point, AdjacencyList
 from solvers.solution import SolutionNode, get_previous_state, prepopulate_grid
 
+
 def solve_brute_force(G: Game, verbose=False):
     """Brute-force solver, but using simple heuristics.
 
@@ -15,10 +16,7 @@ def solve_brute_force(G: Game, verbose=False):
     C, R = G.grid.shape
 
     def get_piece():
-        return G._get_piece(next(filter(
-            lambda c: c[1] > 0,
-            G.pieces_left.items()
-        ))[0])
+        return G._get_piece(next(filter(lambda c: c[1] > 0, G.pieces_left.items()))[0])
 
     def rollback_to(game: Game, grid_state: tuple([Grid, dict])):
         if grid_state is not None:
@@ -54,8 +52,8 @@ def solve_brute_force(G: Game, verbose=False):
             for piece_span in piece.spans:
                 px, py = piece_span
                 no_fit.append((px > X or py > Y))
-            
-            return not(all(no_fit))
+
+            return not (all(no_fit))
 
         piece_nodes = []
         C, R = game.grid.shape
@@ -65,24 +63,15 @@ def solve_brute_force(G: Game, verbose=False):
                 piece, _ = field.node
                 if piece is not None:
                     piece_nodes.append((x, y))
-        A = AdjacencyList(
-            grid_shape=game.grid.shape,
-            inaccessible=piece_nodes
-        )
+        A = AdjacencyList(grid_shape=game.grid.shape, inaccessible=piece_nodes)
         components = A.find_connected_components()
 
         pieces_left = [code for code, n in game.pieces_left.items() if n > 0]
-        color_codes = {
-            piece.code: piece
-            for piece in COLORS
-        }
+        color_codes = {piece.code: piece for piece in COLORS}
         # Try to find a component that won't fit any piece (by n empty nodes)
         for nodes in components.values():
             c_size = len(nodes)
-            smallest_piece = min([
-                    color_codes[code].size
-                    for code in pieces_left
-                ])
+            smallest_piece = min([color_codes[code].size for code in pieces_left])
             if smallest_piece > c_size:
                 return True
 
@@ -93,12 +82,14 @@ def solve_brute_force(G: Game, verbose=False):
             for nodes in components.values():
                 c_span = span(nodes)
                 fit.append(check_fit_in_span(piece, c_span))
-            if not(any(fit)):
+            if not (any(fit)):
                 return True
 
         return False
 
-    class GridCompleteException(Exception): pass
+    class GridCompleteException(Exception):
+        pass
+
     def place_nth_piece(n, previous_node=None, verbose=verbose):
         """Cycle through all piece positions and orientations.
         If found a valid placement, attempt to place the next piece
@@ -111,16 +102,12 @@ def solve_brute_force(G: Game, verbose=False):
 
         no_space_left = check_no_space_left(game=G)
         if not no_space_left:
-            for y, x, ori in product(
-                range(R),
-                range(C),
-                piece.valid_orientations
-            ):
-                placed = G.place(piece.code, at=Point(x,y), orientation=ori)
+            for y, x, ori in product(range(R), range(C), piece.valid_orientations):
+                placed = G.place(piece.code, at=Point(x, y), orientation=ori)
                 if placed:
-                    current_node = SolutionNode(piece=piece,
-                                                point=Point(x,y),
-                                                orientation=ori)
+                    current_node = SolutionNode(
+                        piece=piece, point=Point(x, y), orientation=ori
+                    )
                     current_node.previous = previous_node
                     if verbose:
                         print(f"Piece placed! {G.pieces_left} pieces left")
@@ -129,11 +116,11 @@ def solve_brute_force(G: Game, verbose=False):
                     if G.grid._is_complete():
                         raise GridCompleteException
                     else:
-                        place_nth_piece(n+1, previous_node=current_node)
+                        place_nth_piece(n + 1, previous_node=current_node)
 
         if (not placed) or (no_space_left):
             if verbose:
-                if no_space_left: 
+                if no_space_left:
                     print("No space left")
                 print(f"Couldn't place piece {n}. Rolling back to previous state:")
             pieces_placed = get_previous_state(current_node)
@@ -147,4 +134,3 @@ def solve_brute_force(G: Game, verbose=False):
         print(G.grid)
     except Exception as e:
         print(e)
-    
