@@ -12,7 +12,7 @@ DIRECTIONS = (U, R, D, L)
 class Piece:
     code = None
     size = None
-    valid_orientations = None
+    valid_orientations = [-4, -3, -2, 1, 1, 2, 3, 4]
     spans = None
 
     def __init__(self, orientation=1):
@@ -54,6 +54,7 @@ class Piece:
         return self
 
     def assign_neighbours():
+        """Assign directions of neighbours according to base orientation"""
         pass
 
     def set_orientation(self, orientation):
@@ -124,16 +125,15 @@ class Cyan(Piece):
     [][]
     """
 
-    code = "C"
+    code = "CY"
     size = 3
-    valid_orientations = [-4, -3, -2, -1, 1, 2, 3, 4]
-    spans = [(2, 2), (2, 2)]
+    # valid_orientations = [-4, -3, -2, -1, 1, 2, 3, 4]
+    spans = [(2, 2)]
 
     def __init__(self, orientation=1):
         super().__init__(orientation=orientation)
 
     def assign_neighbours(self):
-        """Assign directions of neighbours according to base orientation"""
         self.directions = {0: {1: 2}, 1: {0: 0, 2: 1}, 2: {1: 3}}
 
 
@@ -144,16 +144,15 @@ class Orange(Piece):
       []
     """
 
-    code = "O"
+    code = "OR"
     size = 5
-    valid_orientations = [-4, -3, -2, -1, 1, 2, 3, 4]
+    # valid_orientations = [-4, -3, -2, -1, 1, 2, 3, 4]
     spans = [(3, 3), (3, 3)]
 
     def __init__(self, orientation=1):
         super().__init__(orientation=orientation)
 
     def assign_neighbours(self):
-        """Assign directions of neighbours according to base orientation"""
         self.directions = {
             0: {1: 3},
             1: {0: 1, 2: 2},
@@ -163,4 +162,248 @@ class Orange(Piece):
         }
 
 
-COLORS = [Orange, Cyan]
+class Indigo(Piece):
+    """Base orientation:
+    []
+    [][][]
+    """
+
+    code = "IN"
+    size = 4
+    # valid_orientations = [-4, -3, -2, -1, 1, 2, 3, 4]
+    spans = [(3, 2), (2, 3)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {0: {1: 2}, 1: {0: 0, 2: 1}, 2: {1: 3, 3: 1}, 3: {2: 3}}
+
+
+class Maroon(Piece):
+    """Base orientation:
+    [][]
+      [][]
+    """
+
+    code = "MR"
+    size = 4
+    # valid_orientations = [-4, -3, -2, 1, 1, 2, 3, 4]
+    spans = [(3, 2), (2, 3)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {0: {1: 1}, 1: {0: 3, 2: 2}, 2: {1: 0, 3: 1}, 3: {2: 3}}
+
+
+class Teal(Piece):
+    """Base orientation:
+      []
+    [][][]
+    """
+
+    code = "TE"
+    size = 4
+    # valid_orientations = [1, 2, 3, 4]
+    spans = [(3, 2), (2, 3)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {0: {1: 1}, 1: {0: 3, 2: 0, 3: 1}, 2: {1: 2}, 3: {1: 3}}
+
+
+class AzureBlue(Piece):
+    """Base orientation:
+    []
+    []
+    [][][]
+    """
+
+    code = "AB"
+    size = 5
+    spans = [(3, 3)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {
+            0: {1: 2},
+            1: {0: 0, 2: 2},
+            2: {1: 0, 3: 1},
+            3: {2: 3, 4: 1},
+            4: {3: 3},
+        }
+
+
+class EmeraldGreen(Piece):
+    """Base orientation:
+    []  []
+    [][][]
+    """
+
+    code = "EG"
+    size = 5
+    spans = [(3, 2), (2, 3)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {
+            0: {1: 2},
+            1: {0: 0, 2: 1},
+            2: {1: 3, 3: 1},
+            3: {2: 3, 4: 0},
+            4: {3: 2},
+        }
+
+
+class Magenta(Piece):
+    """Base orientation:
+    [][]
+      [][][]
+    """
+
+    code = "MA"
+    size = 5
+    spans = [(2, 4), (4, 2)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {
+            0: {1: 1},
+            1: {0: 3, 2: 2},
+            2: {1: 0, 3: 1},
+            3: {2: 3, 4: 1},
+            4: {3: 3},
+        }
+
+
+class MintGreen(Piece):
+    """Base orientation:
+    [][]
+    [][][]
+    """
+
+    code = "MI"
+    size = 5
+    spans = [(3, 2), (2, 3)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {
+            0: {1: 1, 2: 2},
+            1: {0: 3, 3: 2},
+            2: {0: 0, 3: 1},
+            3: {2: 3, 1: 0, 4: 1},
+            4: {3: 3},
+        }
+
+
+class Red(Piece):
+    """Base orientation:
+    []
+    [][][][]
+    """
+
+    code = "RE"
+    size = 5
+    spans = [(2, 4), (4, 2)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {
+            0: {1: 2},
+            1: {0: 0, 2: 1},
+            2: {1: 3, 3: 1},
+            3: {2: 3, 4: 1},
+            4: {3: 3},
+        }
+
+
+class Wine(Piece):
+    """Base orientation:
+    []
+    [][]
+      [][]
+    """
+
+    code = "WI"
+    size = 5
+    spans = [(3, 3)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {
+            0: {1: 2},
+            1: {0: 0, 2: 1},
+            2: {1: 3, 3: 2},
+            3: {2: 0, 4: 1},
+            4: {3: 3},
+        }
+
+
+class Yellow(Piece):
+    """Base orientation:
+      []
+    [][][][]
+    """
+
+    code = "YE"
+    size = 5
+    spans = [(2, 4), (4, 2)]
+
+    def __init__(self, orientation=1):
+        super().__init__(orientation=orientation)
+
+    def assign_neighbours(self):
+        self.directions = {
+            0: {1: 1},
+            1: {0: 3, 2: 0, 3: 1},
+            2: {1: 2},
+            3: {1: 3, 4: 1},
+            4: {3: 3},
+        }
+
+
+COLORS = [
+    Cyan,
+    Indigo,
+    Maroon,
+    Teal,
+    AzureBlue,
+    EmeraldGreen,
+    Magenta,
+    MintGreen,
+    Red,
+    Wine,
+    Yellow,
+    Orange,
+]
+
+# if __name__ == "__main__":
+
+#     from game import Game
+#     from itertools import product
+
+#     for piece in COLORS:
+#             g = Game(grid_shape=(4, 4), pieces={piece.code: 1})
+#             n_cols, n_rows = g.grid.shape
+#             for y, x, ori in product(range(n_rows), range(n_cols), piece.valid_orientations):
+#                 placed = g.place(piece.code, at=Point(x, y))
+#                 if placed:
+#                     break
+#             print(g.grid)
