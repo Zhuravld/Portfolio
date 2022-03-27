@@ -58,6 +58,7 @@ class Player:
             self.execute_move(to)
         else:
             print(msg)
+            self.done = False
 
         return self.done
 
@@ -66,18 +67,18 @@ class Player:
 
 
 if __name__ == "__main__":
-    import json
-
     def input_to_tuple(inp):
         """Parse user input string into coords tuple."""
-        return tuple(map(int, inp.replace("()", "").strip().split(",")))
+        for char_to_remove in ["(", ")"]:
+            inp = inp.replace(char_to_remove, "")
+        return tuple(map(int, inp.strip().split(",")))
 
     inp = ""
     while inp.lower() not in ("y", "yes", "n", "no"):
         inp = input("Use default spec? (y/n): ")
     if inp[0] == "y":
-        with open("test/test_spec.json", "r") as f:
-            spec = json.load(f)
+        from test.test_Grid import test_spec as spec
+
     else:
         print("Enter custom spec below")
         spec = {}
