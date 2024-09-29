@@ -128,3 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 GamesRL/pirate-passage/.vscode/settings.json
+/.idea/vcs.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/Portfolio.iml
+/.idea/modules.xml
+/.idea/misc.xml
