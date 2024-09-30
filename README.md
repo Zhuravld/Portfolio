@@ -4,10 +4,15 @@
 
 All of my projects in one place.
 
-Currently includes following projects:
-
-### _Tetris puzzle_
+### Kaggle
 ##### (Most recent - go here first!)
+
+Used Kaggle's [House Prices](https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques/data) competition to demonstrate my approach to a routine data science task. The focus is less on applying advanced modelling techniques and more about the thinking behind maximizing data science delivery while adapting to risk and business realities.
+
+
+
+### Other projects:
+##### _Tetris puzzle_
 An implementation of the puzzle game [IQ Puzzler Pro](https://www.smartgames.eu/uk/one-player-games/iq-puzzler-pro). 2D version only.
 Not meant to be human-playable. Instead, intended as an environment for testing various algorithms for solving the game.
 
@@ -18,7 +23,7 @@ Planned development:
 4. - [ ] GUI
 
 
-### _Pirate passage_
+##### _Pirate passage_
 An implementation of the [Pirate Passage](https://www.lumosity.com/app/v4/games/pirate-passage) game on Luminosity.
 Not meant to be human-playable. Instead, intended as an environment for testing various algorithms for solving the game.
 
