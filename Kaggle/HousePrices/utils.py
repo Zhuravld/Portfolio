@@ -1,5 +1,39 @@
 __version__ = "0.01"
 
+
+from typing import Union, Optional
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+def histplots(*labelled_arrays: Union[pd.Series, tuple[pd.Series, str]], bins: int) -> None:
+    
+    def get_series_and_label_from_labelled_array(labelled_array) -> tuple[np.array, Optional[str]]:
+        try:
+            series, label = labelled_array
+        except:
+            series = labelled_array
+            label = None
+        return series, label
+    
+    # get bin edges
+    merged_series = np.concatenate([
+        get_series_and_label_from_labelled_array(labelled_array)[0]
+        for labelled_array in labelled_arrays
+    ])
+    bin_edges = np.histogram_bin_edges(merged_series, bins=bins)
+    
+    # plot
+    for labelled_array in labelled_arrays:
+        series, label = get_series_and_label_from_labelled_array(labelled_array)
+        sns.histplot(series, label=label, bins=bin_edges)
+        
+    if label is not None:
+        plt.legend()
+
+
 class Compare:
     """Context manager to track an object and print the change in shape.
 
